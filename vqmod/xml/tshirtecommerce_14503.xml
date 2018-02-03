@@ -1,0 +1,116 @@
+<modification>
+	<id>tshirtecommerce</id>
+	<version>4.1.0</version>
+	<vqmver>2.6.1</vqmver>
+	<author>Tshirtecommerce Team</author>
+
+	<file name="catalog/controller/checkout/cart.php">
+		<operation error="skip">
+			<search position="before"><![CDATA[$this->cart->add]]></search>
+			<add><![CDATA[
+				// Get tshirtecommerce information of product added
+				if (isset($this->request->post['design']))
+				{
+					$design 			= $this->request->post['design'];
+					$option['design'] 	= $design;
+				}
+				else
+				{
+					$str_design_product_id 	= '';
+					$str_row_id 			= '';
+					$str_color 				= '';
+					$str_design 			= '';
+
+					$this->load->model('tshirtecommerce/order');
+
+					$tshirtecommerce_product = $this->model_tshirtecommerce_order->getProduct($this->request->post['product_id']);
+
+					if(isset($tshirtecommerce_product['design_product_id']))
+					{
+						// Validate calculation of price
+						$tshirtecommerce_split_arr = isset($tshirtecommerce_product['design_product_id']) ? explode(':', $tshirtecommerce_product['design_product_id']) : array();
+
+						if(count($tshirtecommerce_split_arr) > 1)
+						{
+							$str_row_id 			= isset($tshirtecommerce_split_arr[0]) ? $tshirtecommerce_split_arr[0] : '';
+							$str_design 			= isset($tshirtecommerce_split_arr[1]) ? $tshirtecommerce_split_arr[1] : '';
+							$str_design_product_id 	= isset($tshirtecommerce_split_arr[2]) ? $tshirtecommerce_split_arr[2] : '';
+							$str_color 				= isset($tshirtecommerce_split_arr[3]) ? $tshirtecommerce_split_arr[3] : '';
+						}
+						else
+						{
+							$str_design_product_id 	= $tshirtecommerce_product['design_product_id'];
+						}
+					}
+					
+					// Get Price of tshirtecommerce
+					$tshirtecommerce_file 	= dirname(DIR_SYSTEM).'/tshirtecommerce/data/products.json';
+					$tshirtecommerce_price 	= 0;
+
+					if(file_exists($tshirtecommerce_file))
+					{
+						$string = file_get_contents($tshirtecommerce_file);
+
+						if ($string != FALSE)
+						{
+							$tshirtecommerce_products = json_decode($string, TRUE);
+							
+							// Default product
+							foreach($tshirtecommerce_products['products'] as $p)
+							{
+								if($p['id'] == $str_design_product_id)
+								{
+									$design 			= array();
+									$design['rowid'] 	= (!empty($str_row_id)) ? $str_row_id : $str_design_product_id;
+
+									if(!empty($str_row_id))
+									{
+										foreach($p['design']['color_hex'] as $idx => $color)
+										{
+											if($str_color == $color)
+											{
+												$design['color_hex'] 	= $str_color;
+												$design['color_title'] 	= $p['design']['color_title'][$idx];
+
+												break;
+											}
+										}
+									}
+									else
+									{
+										$design['color_hex'] 	= isset($p['design']['color_hex'][0]) 	? $p['design']['color_hex'][0] 		: '';
+										$design['color_title'] 	= isset($p['design']['color_title'][0]) ? $p['design']['color_title'][0] 	: '';
+									}
+
+									$design['design_product_id'] 	= $p['id'];
+									$design['images'] 				= '';
+									$design['product_id'] 			= $tshirtecommerce_product['product_id'];
+									$design['options'] 				= array();
+									$design['options'][] 			= array('name' => 'Printing type', 'type' => 'printing', 'value' => $p['print_type']);
+
+									if(!empty($str_row_id))
+									{
+										$str_design_product_title_img 	= isset($product_info['design_product_title_img']) 
+											? (explode('::', $product_info['design_product_title_img'])) 
+											: array();
+
+										$oc_price_of_print 				= isset($str_design_product_title_img[2]) ? $str_design_product_title_img[2] : 0;
+										
+										$design['oc_price_of_print'] 	= $oc_price_of_print;
+									}
+									else
+									{
+										$design['oc_price_of_print'] 	= 0;
+									}
+
+									$option['design'] = $design;
+								}
+							}
+						}
+					}
+				}
+			]]></add>
+		</operation>
+	</file>
+
+</modification>

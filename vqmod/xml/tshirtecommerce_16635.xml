@@ -1,0 +1,428 @@
+<modification>
+	<id>tshirtecommerce</id>
+	<version>4.1.0</version>
+	<vqmver>2.6.1</vqmver>
+	<author>Tshirtecommerce Team</author>
+
+	<file name="catalog/controller/module/featured.php">
+		<operation error="skip" info="Adding custom design button on home page">
+			<search position="before"><![CDATA[$data['products'][]]]></search>
+			<add><![CDATA[
+				$customize_link = '';
+				$product_design_id = '';
+				$parent_id = $product_info['product_id'];
+
+				$this->load->model('setting/setting');
+				$settings = $this->model_setting_setting->getSetting('tshirtecommerce');
+				if(isset($settings['tshirtecommerce_feature']) && $settings['tshirtecommerce_feature'] == 1)
+				{
+					$query16635 = $this->db->query("SELECT `design_product_id` FROM `".DB_PREFIX."product` WHERE `product_id` = ".$product_info['product_id'] ." LIMIT 1");
+					$product_design_id = $query16635->row['design_product_id'];
+
+					if($product_design_id != false && !empty($product_design_id) && $parent_id > 0)
+					{
+						$customize_link = 'index.php?route=tshirtecommerce/designer&product_id='.$product_design_id.'&parent_id='.$parent_id;
+					}
+				}
+
+				if(!defined('ROOT'))
+				{
+					define('ROOT', str_replace('system/', 'tshirtecommerce', DIR_SYSTEM));
+				}
+				if(!defined('DS'))
+				{
+					define('DS', DIRECTORY_SEPARATOR);
+				}
+				$tshirtecommerce_custom_button_text = '';
+				if(file_exists(ROOT.DS.'includes'.DS.'functions.php'))
+				{
+					include_once ROOT.DS.'includes'.DS.'functions.php';
+					$dg = new dg();
+					$lang = $dg->lang();
+					$tshirtecommerce_custom_button_text = $lang['tshirtecommerce_custom_button_text'];
+				}
+			]]></add>
+		</operation>
+		<operation error="skip" info="Adding custom design button on home page">
+			<search position="after"><![CDATA[$data['products'][]]]></search>
+			<add><![CDATA[
+				'customize_link' => $customize_link,
+				'tshirtecommerce_custom_button_text' => $tshirtecommerce_custom_button_text,
+			]]></add>
+		</operation>
+	</file>
+	<file name="catalog/view/theme/*/template/module/featured.tpl">
+		<operation error="skip" info="Adding custom design button on home page">
+			<search position="before"><![CDATA[cart.add]]></search>
+			<add><![CDATA[
+				<?php if(!empty($product['customize_link'])) { ?>
+				<button style="width:100%;border-bottom:1px solid #ddd;" onclick="location.href='<?php echo $product['customize_link']; ?>'">
+					<i class="fa fa-paint-brush" aria-hidden="true"></i>
+					<span class="hidden-xs"><?php echo $product['tshirtecommerce_custom_button_text']; ?></span>
+				</button><br/>
+				<?php } ?>
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="catalog/controller/product/product.php">
+		<operation error="skip" info="Adding custom design button on search page, category page">
+			<search position="before"><![CDATA[$data['products'][]]]></search>
+			<add><![CDATA[
+				$customize_link = '';
+				$product_design_id = '';
+				$parent_id = $result['product_id'];
+
+				$this->load->model('setting/setting');
+				$settings = $this->model_setting_setting->getSetting('tshirtecommerce');
+				if(isset($settings['tshirtecommerce_home']) && $settings['tshirtecommerce_home'] == 1)
+				{
+					$query16635 = $this->db->query("SELECT `design_product_id` FROM `".DB_PREFIX."product` WHERE `product_id` = ".$result['product_id'] ." LIMIT 1");
+					$product_design_id = $query16635->row['design_product_id'];
+
+					if($product_design_id != false && !empty($product_design_id) && $parent_id > 0)
+					{
+						$customize_link = 'index.php?route=tshirtecommerce/designer&product_id='.$product_design_id.'&parent_id='.$parent_id;
+					}
+				}
+				if(!defined('ROOT'))
+				{
+					define('ROOT', str_replace('system/', 'tshirtecommerce', DIR_SYSTEM));
+				}
+				if(!defined('DS'))
+				{
+					define('DS', DIRECTORY_SEPARATOR);
+				}
+				$tshirtecommerce_custom_button_text = '';
+				if(file_exists(ROOT.DS.'includes'.DS.'functions.php'))
+				{
+					include_once ROOT.DS.'includes'.DS.'functions.php';
+					$dg = new dg();
+					$lang = $dg->lang();
+					$tshirtecommerce_custom_button_text = $lang['tshirtecommerce_custom_button_text'];
+				}
+			]]></add>
+		</operation>
+		<operation error="skip" info="Adding custom design button on search page, category page">
+			<search position="after"><![CDATA[$data['products'][]]]></search>
+			<add><![CDATA[
+				'customize_link' => $customize_link,
+				'tshirtecommerce_custom_button_text' => $tshirtecommerce_custom_button_text,
+			]]></add>
+		</operation>
+	</file>
+	<file name="catalog/view/theme/*/template/product/product.tpl">
+		<operation error="skip" info="Adding custom design button on search page">
+			<search position="before"><![CDATA[cart.add]]></search>
+			<add><![CDATA[
+				<?php if(!empty($product['customize_link'])) { ?>
+				<button style="width:100%;border-bottom:1px solid #ddd;" onclick="location.href='<?php echo $product['customize_link']; ?>'">
+					<i class="fa fa-paint-brush" aria-hidden="true"></i>
+					<span class="hidden-xs"><?php echo $product['tshirtecommerce_custom_button_text']; ?></span>
+				</button><br/>
+				<?php } ?>
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="catalog/controller/product/search.php">
+		<operation error="skip" info="Adding custom design button on search page, category page">
+			<search position="before"><![CDATA[$data['products'][]]]></search>
+			<add><![CDATA[
+				$customize_link = '';
+				$product_design_id = '';
+				$parent_id = $result['product_id'];
+
+				$this->load->model('setting/setting');
+				$settings = $this->model_setting_setting->getSetting('tshirtecommerce');
+				if(isset($settings['tshirtecommerce_search']) && $settings['tshirtecommerce_search'] == 1)
+				{
+					$query16635 = $this->db->query("SELECT `design_product_id` FROM `".DB_PREFIX."product` WHERE `product_id` = ".$result['product_id'] ." LIMIT 1");
+					$product_design_id = $query16635->row['design_product_id'];
+
+					if($product_design_id != false && !empty($product_design_id) && $parent_id > 0)
+					{
+						$customize_link = 'index.php?route=tshirtecommerce/designer&product_id='.$product_design_id.'&parent_id='.$parent_id;
+					}
+				}
+				if(!defined('ROOT'))
+				{
+					define('ROOT', str_replace('system/', 'tshirtecommerce', DIR_SYSTEM));
+				}
+				if(!defined('DS'))
+				{
+					define('DS', DIRECTORY_SEPARATOR);
+				}
+				$tshirtecommerce_custom_button_text = '';
+				if(file_exists(ROOT.DS.'includes'.DS.'functions.php'))
+				{
+					include_once ROOT.DS.'includes'.DS.'functions.php';
+					$dg = new dg();
+					$lang = $dg->lang();
+					$tshirtecommerce_custom_button_text = $lang['tshirtecommerce_custom_button_text'];
+				}
+			]]></add>
+		</operation>
+		<operation error="skip" info="Adding custom design button on search page, category page">
+			<search position="after"><![CDATA[$data['products'][]]]></search>
+			<add><![CDATA[
+				'customize_link' => $customize_link,
+				'tshirtecommerce_custom_button_text' => $tshirtecommerce_custom_button_text,
+			]]></add>
+		</operation>
+	</file>
+	<file name="catalog/view/theme/*/template/product/search.tpl">
+		<operation error="skip" info="Adding custom design button on search page">
+			<search position="before"><![CDATA[cart.add]]></search>
+			<add><![CDATA[
+				<?php if(!empty($product['customize_link'])) { ?>
+				<button style="width:100%;border-bottom:1px solid #ddd;" onclick="location.href='<?php echo $product['customize_link']; ?>'">
+					<i class="fa fa-paint-brush" aria-hidden="true"></i>
+					<span class="hidden-xs"><?php echo $product['tshirtecommerce_custom_button_text']; ?></span>
+				</button><br/>
+				<?php } ?>
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="catalog/controller/product/category.php">
+		<operation error="skip" info="Adding custom design button on category page">
+			<search position="before"><![CDATA[$data['products'][]]]></search>
+			<add><![CDATA[
+				$customize_link = '';
+				$product_design_id = '';
+				$parent_id = $result['product_id'];
+
+				$this->load->model('setting/setting');
+				$settings = $this->model_setting_setting->getSetting('tshirtecommerce');
+				if(isset($settings['tshirtecommerce_category']) && $settings['tshirtecommerce_category'] == 1)
+				{
+					$query16635 = $this->db->query("SELECT `design_product_id` FROM `".DB_PREFIX."product` WHERE `product_id` = ".$result['product_id'] ." LIMIT 1");
+					$product_design_id = $query16635->row['design_product_id'];
+
+					if($product_design_id != false && !empty($product_design_id) && $parent_id > 0)
+					{
+						$customize_link = 'index.php?route=tshirtecommerce/designer&product_id='.$product_design_id.'&parent_id='.$parent_id;
+					}
+				}
+				if(!defined('ROOT'))
+				{
+					define('ROOT', str_replace('system/', 'tshirtecommerce', DIR_SYSTEM));
+				}
+				if(!defined('DS'))
+				{
+					define('DS', DIRECTORY_SEPARATOR);
+				}
+				$tshirtecommerce_custom_button_text = '';
+				if(file_exists(ROOT.DS.'includes'.DS.'functions.php'))
+				{
+					include_once ROOT.DS.'includes'.DS.'functions.php';
+					$dg = new dg();
+					$lang = $dg->lang();
+					$tshirtecommerce_custom_button_text = $lang['tshirtecommerce_custom_button_text'];
+				}
+			]]></add>
+		</operation>
+		<operation error="skip" info="Adding custom design button on category page">
+			<search position="after"><![CDATA[$data['products'][]]]></search>
+			<add><![CDATA[
+				'customize_link' => $customize_link,
+				'tshirtecommerce_custom_button_text' => $tshirtecommerce_custom_button_text,
+			]]></add>
+		</operation>
+	</file>
+	<file name="catalog/view/theme/*/template/product/category.tpl">
+		<operation error="skip" info="Adding custom design button on category page">
+			<search position="before"><![CDATA[cart.add]]></search>
+			<add><![CDATA[
+				<?php if(!empty($product['customize_link'])) { ?>
+				<button style="width:100%;border-bottom:1px solid #ddd;" onclick="location.href='<?php echo $product['customize_link']; ?>'">
+					<i class="fa fa-paint-brush" aria-hidden="true"></i>
+					<span class="hidden-xs"><?php echo $product['tshirtecommerce_custom_button_text']; ?></span>
+				</button><br/>
+				<?php } ?>
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="catalog/controller/product/special.php">
+		<operation error="skip" info="Adding custom design button on special page">
+			<search position="before"><![CDATA[$data['products'][]]]></search>
+			<add><![CDATA[
+				$customize_link = '';
+				$product_design_id = '';
+				$parent_id = $result['product_id'];
+
+				$this->load->model('setting/setting');
+				$settings = $this->model_setting_setting->getSetting('tshirtecommerce');
+				if(isset($settings['tshirtecommerce_special']) && $settings['tshirtecommerce_special'] == 1)
+				{
+					$query16635 = $this->db->query("SELECT `design_product_id` FROM `".DB_PREFIX."product` WHERE `product_id` = ".$result['product_id'] ." LIMIT 1");
+					$product_design_id = $query16635->row['design_product_id'];
+
+					if($product_design_id != false && !empty($product_design_id) && $parent_id > 0)
+					{
+						$customize_link = 'index.php?route=tshirtecommerce/designer&product_id='.$product_design_id.'&parent_id='.$parent_id;
+					}
+				}
+				if(!defined('ROOT'))
+				{
+					define('ROOT', str_replace('system/', 'tshirtecommerce', DIR_SYSTEM));
+				}
+				if(!defined('DS'))
+				{
+					define('DS', DIRECTORY_SEPARATOR);
+				}
+				$tshirtecommerce_custom_button_text = '';
+				if(file_exists(ROOT.DS.'includes'.DS.'functions.php'))
+				{
+					include_once ROOT.DS.'includes'.DS.'functions.php';
+					$dg = new dg();
+					$lang = $dg->lang();
+					$tshirtecommerce_custom_button_text = $lang['tshirtecommerce_custom_button_text'];
+				}
+			]]></add>
+		</operation>
+		<operation error="skip" info="Adding custom design button on special page">
+			<search position="after"><![CDATA[$data['products'][]]]></search>
+			<add><![CDATA[
+				'customize_link' => $customize_link,
+				'tshirtecommerce_custom_button_text' => $tshirtecommerce_custom_button_text,
+			]]></add>
+		</operation>
+	</file>
+	<file name="catalog/view/theme/*/template/product/special.tpl">
+		<operation error="skip" info="Adding custom design button on special page">
+			<search position="before"><![CDATA[cart.add]]></search>
+			<add><![CDATA[
+				<?php if(!empty($product['customize_link'])) { ?>
+				<button style="width:100%;border-bottom:1px solid #ddd;" onclick="location.href='<?php echo $product['customize_link']; ?>'">
+					<i class="fa fa-paint-brush" aria-hidden="true"></i>
+					<span class="hidden-xs"><?php echo $product['tshirtecommerce_custom_button_text']; ?></span>
+				</button><br/>
+				<?php } ?>
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="catalog/controller/product/compare.php">
+		<operation error="skip" info="Adding custom design button on compare page">
+			<search position="before"><![CDATA[$data['products'][$product_id]]]></search>
+			<add><![CDATA[
+				$customize_link = '';
+				$product_design_id = '';
+				$parent_id = $product_info['product_id'];
+
+				$this->load->model('setting/setting');
+				$settings = $this->model_setting_setting->getSetting('tshirtecommerce');
+				if(isset($settings['tshirtecommerce_compare']) && $settings['tshirtecommerce_compare'] == 1)
+				{
+					$query16635 = $this->db->query("SELECT `design_product_id` FROM `".DB_PREFIX."product` WHERE `product_id` = ".$product_info['product_id'] ." LIMIT 1");
+					$product_design_id = $query16635->row['design_product_id'];
+
+					if($product_design_id != false && !empty($product_design_id) && $parent_id > 0)
+					{
+						$customize_link = 'index.php?route=tshirtecommerce/designer&product_id='.$product_design_id.'&parent_id='.$parent_id;
+					}
+				}
+				if(!defined('ROOT'))
+				{
+					define('ROOT', str_replace('system/', 'tshirtecommerce', DIR_SYSTEM));
+				}
+				if(!defined('DS'))
+				{
+					define('DS', DIRECTORY_SEPARATOR);
+				}
+				$tshirtecommerce_custom_button_text = '';
+				if(file_exists(ROOT.DS.'includes'.DS.'functions.php'))
+				{
+					include_once ROOT.DS.'includes'.DS.'functions.php';
+					$dg = new dg();
+					$lang = $dg->lang();
+					$tshirtecommerce_custom_button_text = $lang['tshirtecommerce_custom_button_text'];
+				}
+			]]></add>
+		</operation>
+		<operation error="skip" info="Adding custom design button on compare page">
+			<search position="after"><![CDATA[$data['products'][$product_id]]]></search>
+			<add><![CDATA[
+				'customize_link' => $customize_link,
+				'tshirtecommerce_custom_button_text' => $tshirtecommerce_custom_button_text,
+			]]></add>
+		</operation>
+	</file>
+	<file name="catalog/view/theme/*/template/product/compare.tpl">
+		<operation error="skip" info="Adding custom design button on search page">
+			<search position="before"><![CDATA[$product['remove']]]></search>
+			<add><![CDATA[
+				<?php if(!empty($product['customize_link'])) { ?>
+				<button class="btn btn-success btn-block button" onclick="location.href='<?php echo $product['customize_link']; ?>'">
+					<i class="fa fa-paint-brush" aria-hidden="true"></i>
+					<span class="hidden-xs"><?php echo $product['tshirtecommerce_custom_button_text']; ?></span>
+				</button>
+				<?php } ?>
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="catalog/controller/product/manufacturer.php">
+		<operation error="skip" info="Adding custom design button on manufacturer page">
+			<search position="before"><![CDATA[$data['products'][]]]></search>
+			<add><![CDATA[
+				$customize_link = '';
+				$product_design_id = '';
+				$parent_id = $result['product_id'];
+
+				$this->load->model('setting/setting');
+				$settings = $this->model_setting_setting->getSetting('tshirtecommerce');
+				if(isset($settings['tshirtecommerce_manufacturer']) && $settings['tshirtecommerce_manufacturer'] == 1)
+				{
+					$query16635 = $this->db->query("SELECT `design_product_id` FROM `".DB_PREFIX."product` WHERE `product_id` = ".$result['product_id'] ." LIMIT 1");
+					$product_design_id = $query16635->row['design_product_id'];
+
+					if($product_design_id != false && !empty($product_design_id) && $parent_id > 0)
+					{
+						$customize_link = 'index.php?route=tshirtecommerce/designer&product_id='.$product_design_id.'&parent_id='.$parent_id;
+					}
+				}
+				if(!defined('ROOT'))
+				{
+					define('ROOT', str_replace('system/', 'tshirtecommerce', DIR_SYSTEM));
+				}
+				if(!defined('DS'))
+				{
+					define('DS', DIRECTORY_SEPARATOR);
+				}
+				$tshirtecommerce_custom_button_text = '';
+				if(file_exists(ROOT.DS.'includes'.DS.'functions.php'))
+				{
+					include_once ROOT.DS.'includes'.DS.'functions.php';
+					$dg = new dg();
+					$lang = $dg->lang();
+					$tshirtecommerce_custom_button_text = $lang['tshirtecommerce_custom_button_text'];
+				}
+			]]></add>
+		</operation>
+		<operation error="skip" info="Adding custom design button on manufacturer page">
+			<search position="after"><![CDATA[$data['products'][]]]></search>
+			<add><![CDATA[
+				'customize_link' => $customize_link,
+				'tshirtecommerce_custom_button_text' => $tshirtecommerce_custom_button_text,
+			]]></add>
+		</operation>
+	</file>
+	<file name="catalog/view/theme/*/template/product/manufacturer_info.tpl">
+		<operation error="skip" info="Adding custom design button on manufacturer page">
+			<search position="before"><![CDATA[cart.add]]></search>
+			<add><![CDATA[
+				<?php if(!empty($product['customize_link'])) { ?>
+				<button style="width:100%;border-bottom:1px solid #ddd;" onclick="location.href='<?php echo $product['customize_link']; ?>'">
+					<i class="fa fa-paint-brush" aria-hidden="true"></i>
+					<span class="hidden-xs"><?php echo $product['tshirtecommerce_custom_button_text']; ?></span>
+				</button><br/>
+				<?php } ?>
+			]]></add>
+		</operation>
+	</file>
+
+</modification>

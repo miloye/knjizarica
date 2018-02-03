@@ -1,0 +1,220 @@
+<modification>
+	<id>tshirtecommerce</id>
+	<version>4.1.0</version>
+	<vqmver>2.6.1</vqmver>
+	<author>Tshirtecommerce Team</author>
+
+	<file name="catalog/controller/common/header.php">
+		<operation error="skip" info="Auto sync with tshirtecommerce Cliparts Store">
+			<search position="after"><![CDATA[public function index()]]></search>
+			<add><![CDATA[
+				// Load setting
+				$this->load->model('setting/setting');
+				$settings = $this->model_setting_setting->getSetting('tshirtecommerce');
+
+				// Check current time with current acesss
+				$sqltime = $this->db->query("SELECT NOW() as time"); // Get time server - base on database
+				$current_time = new Datetime($sqltime->row['time']);
+
+				if(isset($settings['tshirtecommerce_jobs']) && $settings['tshirtecommerce_jobs'] == 1)
+				{
+					if(isset($settings['tshirtecommerce_jobs_plan']))
+					{
+						// Get data from database
+						$jobs = $this->db->query("SELECT * FROM `" . DB_PREFIX . "tshirtecommerce_jobs` ORDER BY `id` DESC LIMIT 1");
+						$arr = $jobs->row;
+
+						$status 	= (int)$arr['status'];
+						$delay 		= (int)$arr['plan'];
+						$days 		= (int)$arr['days'];
+						$hours 		= (int)$arr['hours'];
+						$minutes 	= (int)$arr['minutes'];
+
+						$last_sync 	= new Datetime($arr['last_sync']);
+
+						if($status == 0)
+						{
+							$sqlmax = $this->db->query("SELECT MAX(`id`) AS id FROM `" . DB_PREFIX . "tshirtecommerce_jobs`");
+							$id_max = $sqlmax->row['id'];
+
+							if(!defined('ROOT'))
+							{
+								define('ROOT', str_replace('system/', 'tshirtecommerce', DIR_SYSTEM));
+							}
+							if(!defined('DS'))
+							{
+								define('DS', DIRECTORY_SEPARATOR);
+							}
+
+							include_once (str_replace('catalog','tshirtecommerce',DIR_APPLICATION).'includes/functions.php');
+							$dg = new dg();
+							$_settings = $dg->getSetting();
+
+							// Run job
+							if($settings['tshirtecommerce_jobs_plan'] == 0 && $arr['plan_hours'] == 1) 	// run every xx hours
+							{
+								$time = $last_sync->modify("+{$delay} hours");
+
+								if($current_time >= $time)
+								{
+									if( isset($_settings->store) && isset($_settings->store->api) && $_settings->store->api != '' && isset($_settings->store->verified) && $_settings->store->verified == 1 && isset($_settings->store->enable) && $_settings->store->enable == 1)
+									{
+										include_once(str_replace('catalog','tshirtecommerce',DIR_APPLICATION).'/api.php');
+										$api = new API($_settings->store->api);
+										
+										// load clipart
+										$api->updateArts();
+
+										// load ideas
+										$api->updateIdeas();
+									}
+
+									// When Run finish, insert an other job
+									$this->db->query("INSERT INTO `".DB_PREFIX."tshirtecommerce_jobs`(`name`,`plan_hours`,`plan_daily`,`plan`,`last_sync`) VALUES('Auto sync store',1,".$delay.",NOW())");
+
+									// Update status again
+									$this->db->query("UPDATE `" . DB_PREFIX . "tshirtecommerce_jobs` SET `status` = 1 WHERE `id` = ".$id_max);
+
+									// Write logs
+									$this->db->query("INSERT INTO `" . DB_PREFIX . "tshirtecommerce_jobs_logs`(`date_start`,`date_finish`) VALUES('".$sqltime->row['time']."', NOW())");
+								}
+							}
+							elseif($settings['tshirtecommerce_jobs_plan'] == 1 && $arr['plan_daily'] == 1)	// run daily
+							{
+								$time = $last_sync->modify("+{$days} days");
+								if($current_time >= $time)
+								{	
+									if( isset($_settings->store) && isset($_settings->store->api) && $_settings->store->api != '' && isset($_settings->store->verified) && $_settings->store->verified == 1 && isset($_settings->store->enable) && $_settings->store->enable == 1)
+									{
+										include_once(str_replace('catalog','tshirtecommerce',DIR_APPLICATION).'/api.php');
+										$api = new API($_settings->store->api);
+										$api->updateArts();		// load clipart
+										$api->updateIdeas();	// load ideas
+									}
+
+									// When Run finish, insert an other job
+									$this->db->query("INSERT INTO `".DB_PREFIX."tshirtecommerce_jobs`(`name`,`plan_daily`,`days`,`hours`,`minutes`,`last_sync`) VALUES('Auto sync store',1,".$days.",".$hours.",".$minutes.", NOW())");
+							
+									// Update status again
+									$this->db->query("UPDATE `" . DB_PREFIX . "tshirtecommerce_jobs` SET `status` = 1 WHERE `id` = ".$id_max);
+
+									// Write logs
+									$this->db->query("INSERT INTO `" . DB_PREFIX . "tshirtecommerce_jobs_logs`(`date_start`,`date_finish`) VALUES('".$sqltime->row['time']."', NOW())");
+								}
+							}
+						}
+					}
+				}
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="admin/controller/common/header.php">
+		<operation error="skip" info="Auto sync with tshirtecommerce Cliparts Store">
+			<search position="after"><![CDATA[public function index()]]></search>
+			<add><![CDATA[
+				// Load setting
+				$this->load->model('setting/setting');
+				$settings = $this->model_setting_setting->getSetting('tshirtecommerce');
+
+				// Check current time with current acesss
+				$sqltime = $this->db->query("SELECT NOW() as time"); // Get time server - base on database
+				$current_time = new Datetime($sqltime->row['time']);
+
+				if(isset($settings['tshirtecommerce_jobs']) && $settings['tshirtecommerce_jobs'] == 1)
+				{
+					if(isset($settings['tshirtecommerce_jobs_plan']))
+					{
+						// Get data from database
+						$jobs = $this->db->query("SELECT * FROM `" . DB_PREFIX . "tshirtecommerce_jobs` ORDER BY `id` DESC LIMIT 1");
+						$arr = $jobs->row;
+
+						$status 	= (int)$arr['status'];
+						$delay 		= (int)$arr['plan'];
+						$days 		= (int)$arr['days'];
+						$hours 		= (int)$arr['hours'];
+						$minutes 	= (int)$arr['minutes'];
+
+						$last_sync 	= new Datetime($arr['last_sync']);
+
+						if($status == 0)
+						{
+							if(!defined('ROOT'))
+							{
+								define('ROOT', str_replace('system/', 'tshirtecommerce', DIR_SYSTEM));
+							}
+							if(!defined('DS'))
+							{
+								define('DS', DIRECTORY_SEPARATOR);
+							}
+
+							include_once (str_replace('admin','tshirtecommerce',DIR_APPLICATION).'includes/functions.php');
+							$dg = new dg();
+							$_settings = $dg->getSetting();
+
+							$sqlmax = $this->db->query("SELECT MAX(`id`) AS id FROM `" . DB_PREFIX . "tshirtecommerce_jobs`");
+							$id_max = $sqlmax->row['id'];
+
+							// Run job
+							if($settings['tshirtecommerce_jobs_plan'] == 0 && $arr['plan_hours'] == 1) 	// run every xx hours
+							{
+								$time = $last_sync->modify("+{$delay} hours");
+								if($current_time >= $time)
+								{
+									// When Run finish, insert an other job
+									$this->db->query("INSERT INTO `".DB_PREFIX."tshirtecommerce_jobs`(`name`,`plan_hours`,`plan_daily`,`plan`,`last_sync`) VALUES('Auto sync store',1,0,".$delay.",NOW())");
+
+									if( isset($_settings->store) && isset($_settings->store->api) && $_settings->store->api != '' && isset($_settings->store->verified) && $_settings->store->verified == 1 && isset($_settings->store->enable) && $_settings->store->enable == 1)
+									{
+										include_once(str_replace('admin','tshirtecommerce',DIR_APPLICATION).'/api.php');
+										$api = new API($_settings->store->api);
+										
+										// load clipart
+										$api->updateArts();
+
+										// load ideas
+										$api->updateIdeas();
+									}
+									
+									// Update status again
+									$this->db->query("UPDATE `" . DB_PREFIX . "tshirtecommerce_jobs` SET `status` = 1 WHERE `id` = ".$id_max);
+
+									// Write logs
+									$this->db->query("INSERT INTO `" . DB_PREFIX . "tshirtecommerce_jobs_logs`(`date_start`,`date_finish`) VALUES('".$sqltime->row['time']."', NOW())");
+								}
+							}
+							elseif($settings['tshirtecommerce_jobs_plan'] == 1 && $arr['plan_daily'] == 1)	// run daily
+							{
+								$time = $last_sync->modify("+{$days} days");
+								if($current_time >= $time)
+								{
+									if( isset($_settings->store) && isset($_settings->store->api) && $_settings->store->api != '' && isset($_settings->store->verified) && $_settings->store->verified == 1 && isset($_settings->store->enable) && $_settings->store->enable == 1)
+									{
+										include_once(str_replace('admin','tshirtecommerce',DIR_APPLICATION).'/api.php');
+										$api = new API($_settings->store->api);
+										
+										// load clipart
+										$api->updateArts();
+
+										// load ideas
+										$api->updateIdeas();
+									}
+
+									// When Run finish, insert an other job
+									$this->db->query("INSERT INTO `".DB_PREFIX."tshirtecommerce_jobs`(`name`,`plan_daily`,`days`,`hours`,`minutes`,`last_sync`) VALUES('Auto sync store',1,".$days.",".$hours.",".$minutes.", NOW())");
+									
+									// Update status again
+									$this->db->query("UPDATE `" . DB_PREFIX . "tshirtecommerce_jobs` SET `status` = 1 WHERE `id` = ".$id_max);
+
+									// Write logs
+									$this->db->query("INSERT INTO `" . DB_PREFIX . "tshirtecommerce_jobs_logs`(`date_start`,`date_finish`) VALUES('".$sqltime->row['time']."', NOW())");
+								}
+							}
+						}
+					}
+				}
+			]]></add>
+		</operation>
+	</file>
+
+</modification>
